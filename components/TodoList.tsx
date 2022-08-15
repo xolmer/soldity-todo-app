@@ -2,7 +2,7 @@ import Navbar from "./Navbar";
 import { IoMdAddCircle } from "react-icons/io";
 import Task from "./Task";
 
-const TodoList = ({ setInput, addTask, input, account, tasks, deleteTask }) => (
+const TodoList = ({ setInput, addTask, input, account, tasks, deleteTask }: any) => (
   <div className="w-[70%] bg-transparent py-4 px-9 rounded-[30px] ">
     <Navbar />
     <h2 className="text-4xl bolder text-white pb-8">What&apos;s up: {account}</h2>
@@ -20,7 +20,7 @@ const TodoList = ({ setInput, addTask, input, account, tasks, deleteTask }) => (
       />
     </form>
     <ul>
-      {tasks.map((task) => (
+      {tasks.map((task: any) => (
         <Task
           key={task.taskId.toString()}
           task={task}

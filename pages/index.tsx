@@ -13,7 +13,7 @@ const Home: NextPage = () => {
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
   const [currentAccount, setCurrentAccount]: any = useState("");
   const [input, setInput] = useState("");
-  const [tasks, setTasks] = useState([]);
+  const [tasks, setTasks]: any = useState([]);
 
   useEffect(() => {
     connectWallet();
@@ -68,7 +68,7 @@ const Home: NextPage = () => {
     }
   };
 
-  const addTask = async (e) => {
+  const addTask = async (e: any) => {
     e.preventDefault();
     let task = {
       taskDescription: input,
@@ -81,7 +81,7 @@ const Home: NextPage = () => {
         const signer = provider.getSigner();
         const contract = new ethers.Contract(contractAddress, TaskContract.abi, signer);
 
-        contract.addTask(task.taskDescription, task.isDeleted).then((res) => {
+        contract.addTask(task.taskDescription, task.isDeleted).then(() => {
           setTasks([...tasks, task]);
           console.log("Task Added");
         });
@@ -94,14 +94,14 @@ const Home: NextPage = () => {
     setInput("");
   };
 
-  const deleteTask = (key) => async () => {
+  const deleteTask = (key: any) => async () => {
     try {
       const { ethereum } = window as any;
       if (ethereum) {
         const provider = new ethers.providers.Web3Provider(ethereum);
         const signer = provider.getSigner();
         const contract = new ethers.Contract(contractAddress, TaskContract.abi, signer);
-        contract.deleteTask(key, true).then((res) => {
+        contract.deleteTask(key, true).then(() => {
           console.log("Task Deleted");
         });
         let tasks = await contract.getTasks();
