@@ -1,21 +1,24 @@
 import Navbar from "./Navbar";
 import { IoMdAddCircle } from "react-icons/io";
-import Task from "./Task";
+import TaskComponent from "./Task";
+import { FC } from "react";
+import { Task } from "../types.d";
 
-interface Task {
-  setInput: any;
-  addTask: any;
-  input: any;
-  account: any;
-  tasks: any;
+interface TaskProps {
+  setInput: (input: string) => void;
+  addTask: (e: React.MouseEvent<SVGElement> | React.FormEvent<HTMLFormElement>) => void;
+  input: string;
+  account: string;
+  tasks: Array<Task>;
   deleteTask: any;
 }
-const TodoList = ({ setInput, addTask, input, account, tasks, deleteTask }: Task) => (
+
+const TodoList: FC<TaskProps> = ({ setInput, addTask, input, account, tasks, deleteTask }) => (
   <div className="w-[70%] bg-transparent py-4 px-9 rounded-[30px] ">
     <Navbar />
     <h2 className="text-4xl bolder text-white pb-8">What&apos;s up: {account}</h2>
     <div className="py-3 text-[#d8e1fa]">TODAY&apos;S TASKS</div>
-    <form className="flex items-center justify-center">
+    <form className="flex items-center justify-center" onSubmit={addTask}>
       <input
         className="rounded-[10px] w-full p-[10px] border-none outline-none bg-[#031956] text-white mb-[10px]"
         placeholder="Add a task for today..."
@@ -29,11 +32,7 @@ const TodoList = ({ setInput, addTask, input, account, tasks, deleteTask }: Task
     </form>
     <ul>
       {tasks.map((task: any) => (
-        <Task
-          key={task.taskId.toString()}
-          task={task}
-          deleteTask={deleteTask(task.taskId.toString())}
-        />
+        <TaskComponent key={task.taskId} task={task} deleteTask={deleteTask(task.taskId)} />
       ))}
     </ul>
   </div>

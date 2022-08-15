@@ -6,6 +6,17 @@ import TodoList from "@components/TodoList";
 import TaskContract from "@artifacts/contracts/TaskContract.sol/TaskContract.json";
 import { ethers } from "ethers";
 import { contractAddress } from "config";
+import { Task } from "../types.d";
+
+const transformTasks = (input: any): Task[] => {
+  return input.map((task: any) => {
+    return {
+      taskId: ethers.BigNumber.from(task[0]).toString(),
+      taskDescription: task[1],
+      isDeleted: task[2],
+    };
+  });
+};
 
 const Home: NextPage = () => {
   //Todo Functions
@@ -13,7 +24,8 @@ const Home: NextPage = () => {
   const [isUserLoggedIn, setIsUserLoggedIn] = useState<boolean>(false);
   const [currentAccount, setCurrentAccount] = useState<string>("");
   const [input, setInput] = useState<string>("");
-  const [tasks, setTasks] = useState<Object[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [loaded, setLoaded] = useState<boolean>(false);
 
   useEffect(() => {
     connectWallet();
@@ -59,7 +71,7 @@ const Home: NextPage = () => {
         const signer = provider.getSigner();
         const contract = new ethers.Contract(contractAddress, TaskContract.abi, signer);
         let tasks = await contract.getTasks();
-        setTasks(tasks);
+        setTasks(transformTasks(tasks));
       } else {
         throw new Error("Ethereum object is not available");
       }
@@ -68,11 +80,12 @@ const Home: NextPage = () => {
     }
   };
 
-  const addTask = async (e: React.FormEvent<HTMLFormElement>) => {
+  const addTask = async (e: React.MouseEvent<SVGElement> | React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    let task = {
+    let task: Task = {
       taskDescription: input,
       isDeleted: false,
+      taskId: "",
     };
     try {
       const { ethereum } = window as any;
@@ -81,10 +94,12 @@ const Home: NextPage = () => {
         const signer = provider.getSigner();
         const contract = new ethers.Contract(contractAddress, TaskContract.abi, signer);
 
-        contract.addTask(task.taskDescription, task.isDeleted).then(() => {
-          setTasks([...tasks, task]);
-          console.log("Task Added");
-        });
+        await (await contract.addTask(task.taskDescription, task.isDeleted)).wait();
+
+        setTasks([...tasks, task]);
+        setLoaded(true);
+        console.log("Task Added");
+        getAllTasks();
       } else {
         throw new Error("Ethereum object is not available");
       }
@@ -92,6 +107,7 @@ const Home: NextPage = () => {
       console.log(err);
     }
     setInput("");
+    getAllTasks();
   };
 
   const deleteTask = (key: string) => async () => {
@@ -101,12 +117,13 @@ const Home: NextPage = () => {
         const provider = new ethers.providers.Web3Provider(ethereum);
         const signer = provider.getSigner();
         const contract = new ethers.Contract(contractAddress, TaskContract.abi, signer);
-        contract.deleteTask(key, true).then(() => {
-          console.log("Task Deleted");
-        });
+
+        const deletingTask = await contract.deleteTask(ethers.BigNumber.from(key), true);
+        await deletingTask.wait();
+
+        console.log("task deleted");
         let tasks = await contract.getTasks();
-        setTasks(tasks);
-        getAllTasks();
+        setTasks(transformTasks(tasks));
       } else {
         throw new Error("Ethereum object is not available");
       }
