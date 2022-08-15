@@ -106,6 +106,7 @@ const Home: NextPage = () => {
         });
         let tasks = await contract.getTasks();
         setTasks(tasks);
+        getAllTasks();
       } else {
         throw new Error("Ethereum object is not available");
       }
