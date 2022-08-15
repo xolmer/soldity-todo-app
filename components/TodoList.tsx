@@ -2,7 +2,15 @@ import Navbar from "./Navbar";
 import { IoMdAddCircle } from "react-icons/io";
 import Task from "./Task";
 
-const TodoList = ({ setInput, addTask, input, account, tasks, deleteTask }: any) => (
+interface Task {
+  setInput: any;
+  addTask: any;
+  input: any;
+  account: any;
+  tasks: any;
+  deleteTask: any;
+}
+const TodoList = ({ setInput, addTask, input, account, tasks, deleteTask }: Task) => (
   <div className="w-[70%] bg-transparent py-4 px-9 rounded-[30px] ">
     <Navbar />
     <h2 className="text-4xl bolder text-white pb-8">What&apos;s up: {account}</h2>

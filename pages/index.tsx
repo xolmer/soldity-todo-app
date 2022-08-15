@@ -9,11 +9,11 @@ import { contractAddress } from "config";
 
 const Home: NextPage = () => {
   //Todo Functions
-  const [correctNetwork, setCorrectNetwork] = useState(false);
-  const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
-  const [currentAccount, setCurrentAccount]: any = useState("");
-  const [input, setInput] = useState("");
-  const [tasks, setTasks]: any = useState([]);
+  const [correctNetwork, setCorrectNetwork] = useState<boolean>(false);
+  const [isUserLoggedIn, setIsUserLoggedIn] = useState<boolean>(false);
+  const [currentAccount, setCurrentAccount] = useState<string>("");
+  const [input, setInput] = useState<string>("");
+  const [tasks, setTasks] = useState<Object[]>([]);
 
   useEffect(() => {
     connectWallet();
@@ -68,7 +68,7 @@ const Home: NextPage = () => {
     }
   };
 
-  const addTask = async (e: any) => {
+  const addTask = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     let task = {
       taskDescription: input,
@@ -94,7 +94,7 @@ const Home: NextPage = () => {
     setInput("");
   };
 
-  const deleteTask = (key: any) => async () => {
+  const deleteTask = (key: string) => async () => {
     try {
       const { ethereum } = window as any;
       if (ethereum) {
