@@ -7,15 +7,18 @@ import TaskContract from "@artifacts/contracts/TaskContract.sol/TaskContract.jso
 import { ethers } from "ethers";
 import { contractAddress } from "config";
 import { Task } from "../types.d";
+import { getAllTaksUtils, setTaskUtils, deleteTaskUtils } from "../utils/ContractUtility";
 
 const transformTasks = (input: any): Task[] => {
-  return input.map((task: any) => {
-    return {
-      taskId: ethers.BigNumber.from(task[0]).toString(),
-      taskDescription: task[1],
-      isDeleted: task[2],
-    };
-  });
+  return input
+    .map((task: any) => {
+      return {
+        taskId: ethers.BigNumber.from(task[0]).toString(),
+        taskDescription: task[1],
+        isDeleted: task[2],
+      };
+    })
+    .reverse();
 };
 
 const Home: NextPage = () => {
@@ -25,7 +28,6 @@ const Home: NextPage = () => {
   const [currentAccount, setCurrentAccount] = useState<string>("");
   const [input, setInput] = useState<string>("");
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [loaded, setLoaded] = useState<boolean>(false);
 
   useEffect(() => {
     connectWallet();
@@ -35,21 +37,18 @@ const Home: NextPage = () => {
   const connectWallet = async () => {
     try {
       const { ethereum } = window as any;
-
       if (!ethereum) {
         throw new Error("Ethereum is not available");
-        return;
       }
       let chainId = await ethereum.request({ method: "eth_chainId" });
       console.log("Connected to chain: ", chainId);
-      const rinkebyChainId = "0x4";
+
       const mumbaiChainId = "0x13881";
-      const localChainId = "0x539";
-      if (chainId !== rinkebyChainId && chainId !== mumbaiChainId && chainId !== localChainId) {
+
+      if (chainId !== mumbaiChainId) {
         alert("Please connect to Mumbai network");
         setCorrectNetwork(false);
         throw new Error("Wrong network");
-        return;
       } else {
         setCorrectNetwork(true);
       }
@@ -65,16 +64,8 @@ const Home: NextPage = () => {
 
   const getAllTasks = async () => {
     try {
-      const { ethereum } = window as any;
-      if (ethereum) {
-        const provider = new ethers.providers.Web3Provider(ethereum);
-        const signer = provider.getSigner();
-        const contract = new ethers.Contract(contractAddress, TaskContract.abi, signer);
-        let tasks = await contract.getTasks();
-        setTasks(transformTasks(tasks));
-      } else {
-        throw new Error("Ethereum object is not available");
-      }
+      let tasks = await getAllTaksUtils(contractAddress, TaskContract);
+      setTasks(transformTasks(tasks));
     } catch (err) {
       console.log(err);
     }
@@ -82,27 +73,9 @@ const Home: NextPage = () => {
 
   const addTask = async (e: React.MouseEvent<SVGElement> | React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    let task: Task = {
-      taskDescription: input,
-      isDeleted: false,
-      taskId: "",
-    };
     try {
-      const { ethereum } = window as any;
-      if (ethereum) {
-        const provider = new ethers.providers.Web3Provider(ethereum);
-        const signer = provider.getSigner();
-        const contract = new ethers.Contract(contractAddress, TaskContract.abi, signer);
-
-        await (await contract.addTask(task.taskDescription, task.isDeleted)).wait();
-
-        setTasks([...tasks, task]);
-        setLoaded(true);
-        console.log("Task Added");
-        getAllTasks();
-      } else {
-        throw new Error("Ethereum object is not available");
-      }
+      const addedTask = await setTaskUtils(contractAddress, TaskContract, input);
+      setTasks([...tasks, addedTask]);
     } catch (err) {
       console.log(err);
     }
@@ -112,21 +85,9 @@ const Home: NextPage = () => {
 
   const deleteTask = (key: string) => async () => {
     try {
-      const { ethereum } = window as any;
-      if (ethereum) {
-        const provider = new ethers.providers.Web3Provider(ethereum);
-        const signer = provider.getSigner();
-        const contract = new ethers.Contract(contractAddress, TaskContract.abi, signer);
-
-        const deletingTask = await contract.deleteTask(ethers.BigNumber.from(key), true);
-        await deletingTask.wait();
-
-        console.log("task deleted");
-        let tasks = await contract.getTasks();
-        setTasks(transformTasks(tasks));
-      } else {
-        throw new Error("Ethereum object is not available");
-      }
+      const deleteTask = await deleteTaskUtils(contractAddress, TaskContract, key);
+      let tasks = deleteTask;
+      setTasks(transformTasks(tasks));
     } catch {
       console.log("Error");
     }

@@ -31,8 +31,13 @@ const TodoList: FC<TaskProps> = ({ setInput, addTask, input, account, tasks, del
       />
     </form>
     <ul>
-      {tasks.map((task: any) => (
-        <TaskComponent key={task.taskId} task={task} deleteTask={deleteTask(task.taskId)} />
+      {tasks.map((task: any, index) => (
+        <TaskComponent
+          key={task.taskId}
+          counter={index}
+          task={task}
+          deleteTask={deleteTask(task.taskId)}
+        />
       ))}
     </ul>
   </div>
