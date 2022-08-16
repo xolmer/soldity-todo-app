@@ -86,8 +86,7 @@ const Home: NextPage = () => {
   const deleteTask = (key: string) => async () => {
     try {
       const deleteTask = await deleteTaskUtils(contractAddress, TaskContract, key);
-      let tasks = deleteTask;
-      setTasks(transformTasks(tasks));
+      setTasks(transformTasks(deleteTask));
     } catch {
       console.log("Error");
     }
